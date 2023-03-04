@@ -11,6 +11,13 @@ services:
     depends_on:
       - db
 
+  db_init:
+    image: app_${APP_NAME}
+    entrypoint: sh
+    command: -c 'php artisan migrate --seed && php artisan reindex'
+    depends_on:
+      - queue-worker
+
   db:
     image: mariadb:latest
     ports:
@@ -50,7 +57,7 @@ services:
     ports:
       - "${FRONTEND_PORT}:3000"
     depends_on:
-      - app
+      - db_init
 
   redis:
     image: redis:7.0.9-alpine3.17

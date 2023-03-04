@@ -1,8 +1,8 @@
 FROM composer:latest AS vendor
 
-COPY /api/composer.json /api/composer.lock /app/
+COPY /api/composer.json /app/
 
-RUN composer update --prefer-dist --no-dev -o --no-scripts --ignore-platform-reqs --no-interaction --no-plugins
+RUN composer install --prefer-dist --no-dev -o --no-scripts --ignore-platform-reqs --no-interaction --no-plugins
 
 FROM php:8.2.3-cli-alpine3.17
 
@@ -33,11 +33,15 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 RUN mkdir -p storage/framework/sessions storage/framework/views storage/framework/cache storage/logs bootstrap/cache \
     && chmod -R 777 storage bootstrap/cache storage \
     && cp .env.dist .env \
-    && php artisan config:cache \
     && composer dump-autoload -o \
+    && php artisan config:cache \
     && php artisan key:generate \
+    && php artisan optimize \
+    && php artisan event:cache \
+    && php artisan route:cache \
     && php artisan octane:install --server=swoole \
-    && chmod +x /entrypoint.sh
+    && chmod +x /entrypoint.sh \
+    && rm -rf .env.dist composer.lock /usr/local/bin/composer
 
 EXPOSE 9000
 

@@ -9,7 +9,6 @@ FROM php:8.2.3-cli-alpine3.17
 RUN apk add --no-cache \
     php81-dev \
     g++ make \
-    bash nano \
     && pecl install openswoole-22.0.0 redis-5.3.7 \
     && docker-php-ext-enable openswoole redis \
     && docker-php-ext-install pdo pdo_mysql \
